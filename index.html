@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="bubble-container"></div>
+
+<div class="firma">🚀 Powered By • I'm DuvalinBS</div>
+
+<div class="nav">
+  <button onclick="irA('principal')">Principal</button>
+  <button onclick="irA('miembros')">Miembros</button>
+  <button onclick="irA('links')">Links</button>
+</div>
+
+<!-- ================= PRINCIPAL ================= -->
+<div id="principal" class="page active">
+<h2>Menu / Principal</h2>
+
+<div class="group-toggle" onclick="toggleGrupo(this)"><span>👑 Dueño / Owner / Líder</span><span class="chevron">▾</span></div>
+<div class="grupo" id="grupo-owner" style="display:none;"></div>
+
+<div class="group-toggle" onclick="toggleGrupo(this)"><span>👑 Devs / Owners / Soporte</span><span class="chevron">▾</span></div>
+<div class="grupo" id="grupo-devs" style="display:none;"></div>
+
+<div class="group-toggle" onclick="toggleGrupo(this)"><span>👑 Ayudantes - Eris Bot</span><span class="chevron">▾</span></div>
+<div class="grupo" id="grupo-ayudantes" style="display:none;"></div>
+</div>
+
+<!-- ================= MIEMBROS ================= -->
+<div id="miembros" class="page">
+<h2>Miembros Destacados</h2>
+
+<div class="group-toggle" onclick="toggleGrupo(this)"><span>⭐ Miembros Destacados</span><span class="chevron">▾</span></div>
+<div class="grupo" id="grupo-miembros" style="display:none;"></div>
+</div>
+
+<!-- ================= LINKS ================= -->
+<div id="links" class="page">
+<h2 class="title">🌐 Links Oficiales</h2>
+<a class="btn" href="LINK_DEL_GRUPO_OFICIAL" target="_blank">Grupo Oficial</a>
+<a class="btn" href="LINK_DEL_GRUPO_SECUNDARIO" target="_blank">Grupo Secundario</a>
+<a class="btn" href="LINK_DEL_CANAL_OFICIAL" target="_blank">Canal Oficial</a>
+</div>
+
+<!-- ================= BOTONES FLOTANTES ================= -->
+<button class="float-btn" id="btnAcceso" onclick="abrirLogin()">🔑 Acceso</button>
+<button class="float-btn" id="btnPanel" onclick="abrirPanelOwner()">👑 Panel Owner</button>
+<button class="float-btn" id="btnMiPerfil" onclick="abrirEdicionPropia()">✏️ Mi Perfil</button>
+
+<!-- ================= MODAL: LOGIN ================= -->
+<div class="modal-overlay" id="modalLogin">
+  <div class="modal-box">
+    <h3>🔑 Acceso Admin/Owner</h3>
+    <div class="field">
+      <label>Ingresa tu PIN</label>
+      <input type="text" id="pinInput" inputmode="numeric" maxlength="8" placeholder="Ej: 483920">
+    </div>
+    <div class="msg" id="loginMsg"></div>
+    <div class="btn copy" onclick="intentarLogin()">Entrar</div>
+    <div class="btn" onclick="cerrarModal('modalLogin')">Cancelar</div>
+  </div>
+</div>
+
+<!-- ================= MODAL: EDITAR PERFIL ================= -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal-box">
+    <h3>✏️ Editar Perfil</h3>
+    <div class="field"><label>Foto (URL)</label><input id="f_foto"></div>
+    <div class="field"><label>Grupo</label>
+      <select id="f_grupo">
+        <option value="owner">Dueño / Owner / Líder</option>
+        <option value="devs">Devs / Owners / Soporte</option>
+        <option value="ayudantes">Ayudantes</option>
+        <option value="miembros">Miembros Destacados</option>
+      </select>
+    </div>
+    <div class="field"><label>Nombre</label><input id="f_nombre"></div>
+    <div class="field"><label>Edad</label><input id="f_edad"></div>
+    <div class="field"><label>Cumpleaños</label><input id="f_cumple"></div>
+    <div class="field"><label>Género</label><input id="f_genero"></div>
+    <div class="field"><label>Región</label><input id="f_region"></div>
+    <div class="field"><label>WhatsApp (número, ej: 521...)</label><input id="f_wa"></div>
+    <div class="field"><label>YouTube (link)</label><input id="f_yt"></div>
+    <div class="field"><label>Instagram (link)</label><input id="f_ig"></div>
+    <div class="field"><label>TikTok (link)</label><input id="f_tt"></div>
+    <div class="msg" id="editMsg"></div>
+    <div class="btn copy" onclick="guardarEdicion()">Guardar</div>
+    <div class="btn" onclick="cerrarModal('modalEdit')">Cerrar</div>
+  </div>
+</div>
+
+<!-- ================= MODAL: PANEL OWNER ================= -->
+<div class="modal-overlay" id="modalOwner">
+  <div class="modal-box">
+    <h3>👑 Panel Owner</h3>
+
+    <div class="btn copy" onclick="mostrarCrear()">➕ Crear nuevo perfil / PIN</div>
+    <div id="crearForm" style="display:none;">
+      <div class="field"><label>Nombre</label><input id="nc_nombre"></div>
+      <div class="field"><label>Grupo</label>
+        <select id="nc_grupo">
+          <option value="owner">Dueño / Owner / Líder</option>
+          <option value="devs">Devs / Owners / Soporte</option>
+          <option value="ayudantes">Ayudantes</option>
+          <option value="miembros">Miembros Destacados</option>
+        </select>
+      </div>
+      <div class="field"><label>Rol de acceso</label>
+        <select id="nc_rol">
+          <option value="admin">Admin (solo edita su propio perfil)</option>
+          <option value="owner">Owner (control total)</option>
+        </select>
+      </div>
+      <div class="msg" id="crearMsg"></div>
+      <div class="btn copy" onclick="crearPerfil()">Generar PIN</div>
+    </div>
+
+    <hr style="border-color:#222;margin:16px 0;">
+    <div id="listaOwner"></div>
+    <div class="btn" onclick="cerrarModal('modalOwner')">Cerrar</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script src="config.js"></script>
+<script src="ui.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
