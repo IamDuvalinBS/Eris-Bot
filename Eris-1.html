@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel de Administración</title>
+<style>
+
+/* ================= BODY ================= */
+body{
+  margin:0;
+  background:#050505;
+  color:white;
+  font-family:Arial;
+  overflow-x:hidden;
+}
+
+/* ================= PÁGINAS ================= */
+.page{
+  display:none;
+  padding:20px;
+  padding-bottom:90px;
+}
+
+.page.active{
+  display:block;
+}
+
+/* ================= FIRMA RGB ================= */
+.firma{
+  font-weight:900;
+  font-size:28px;
+  text-align:center;
+  margin:10px 0 20px;
+  animation: rgb 4s linear infinite;
+  text-shadow:0 0 10px currentColor;
+}
+
+@keyframes rgb{
+  0%{color:#ff0000;}
+  25%{color:#00ff00;}
+  50%{color:#00ffff;}
+  75%{color:#ff00ff;}
+  100%{color:#ff0000;}
+}
+
+/* ================= NAV ================= */
+.nav{
+  text-align:center;
+  margin:15px;
+}
+
+.nav button{
+  background:#00f0ff;
+  color:#000;
+  border:none;
+  padding:10px 15px;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  margin:5px;
+}
+
+/* ================= CARDS ================= */
+.card{
+  margin-bottom:20px;
+  padding:18px;
+  border-radius:18px;
+  border:2px solid #00f0ff;
+
+  background:rgba(15,15,15,.75);
+  backdrop-filter:blur(10px);
+
+  box-shadow:
+    0 0 12px rgba(0,240,255,.35),
+    inset 0 0 10px rgba(255,255,255,.04);
+
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
+
+  box-sizing:border-box;
+}
+
+.card:hover{
+  transform:translateY(-4px);
+  box-shadow:
+    0 0 25px rgba(0,240,255,.7),
+    0 10px 25px rgba(0,0,0,.45);
+}
+
+.card * { box-sizing: border-box; }
+
+/* ================= TITULOS ================= */
+.title{
+  text-align:center;
+  font-size:22px;
+  margin:20px 0;
+  color:#00f0ff;
+  text-shadow:0 0 10px #00f0ff;
+}
+
+/* ================= BOTONES ================= */
+.btn{
+  display:block;
+  margin:8px 0;
+  padding:10px;
+  text-align:center;
+  border-radius:12px;
+  cursor:pointer;
+  background:rgba(0,0,0,0.6);
+  color:white;
+  text-decoration:none;
+  border:1px solid rgba(255,255,255,0.2);
+}
+
+.btn:hover{
+  background:rgba(0,255,255,0.2);
+}
+
+.copy{background:#00f0ff;color:#000;}
+.wa{background:#25D366;color:#fff;}
+.yt{background:#ff0000;color:white;}
+.ig{background:#ff4fd8;color:white;}
+.tt{background:#11f;color:white;}
+.edit{background:#ffb800;color:#000;font-weight:bold;}
+.danger{background:#ff3355;color:#fff;}
+
+/* ================= PFP ================= */
+.pfp{
+  width:100%;
+  height:180px;
+  object-fit:cover;
+  border-radius:12px;
+  border:5px solid #00f0ff;
+  margin-bottom:15px;
+}
+
+/* ================= BUBBLES ================= */
+.bubble-container{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  pointer-events:none;
+  z-index:0;
+}
+
+.bubble{
+  position:absolute;
+  bottom:-120px;
+  border-radius:50%;
+  background:rgba(0,255,255,0.3);
+  animation:float 12s linear infinite;
+}
+
+@keyframes float{
+  from{transform:translateY(0);opacity:0;}
+  to{transform:translateY(-120vh);opacity:1;}
+}
+
+/* ================= BOTONES FLOTANTES ================= */
+.float-btn{
+  position:fixed;
+  right:16px;
+  z-index:50;
+  background:#00f0ff;
+  color:#000;
+  border:none;
+  padding:12px 16px;
+  border-radius:30px;
+  font-weight:bold;
+  box-shadow:0 0 15px rgba(0,240,255,.6);
+  cursor:pointer;
+}
+
+#btnAcceso{ bottom:16px; }
+#btnPanel{ bottom:70px; background:#ffb800; display:none; }
+#btnMiPerfil{ bottom:70px; background:#25D366; color:#fff; display:none; }
+
+/* ================= MODAL ================= */
+.modal-overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.8);
+  z-index:200;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+}
+
+.modal-overlay.active{ display:flex; }
+
+.modal-box{
+  background:#0f0f0f;
+  border:2px solid #00f0ff;
+  border-radius:18px;
+  padding:20px;
+  width:100%;
+  max-width:420px;
+  max-height:85vh;
+  overflow-y:auto;
+  box-shadow:0 0 25px rgba(0,240,255,.5);
+}
+
+.modal-box h3{
+  color:#00f0ff;
+  text-align:center;
+  margin-top:0;
+}
+
+.field label{
+  font-size:13px;
+  color:#aaa;
+  display:block;
+  margin-top:8px;
+}
+
+.field input, .field select{
+  width:100%;
+  padding:9px;
+  margin-top:4px;
+  border-radius:8px;
+  border:1px solid #333;
+  background:#111;
+  color:#fff;
+  font-size:14px;
+}
+
+.msg{
+  text-align:center;
+  font-size:13px;
+  min-height:18px;
+  margin-top:8px;
+}
+
+.msg.ok{ color:#25D366; }
+.msg.err{ color:#ff3355; }
+
+.owner-row{
+  border:1px solid #222;
+  border-radius:10px;
+  padding:10px;
+  margin-bottom:10px;
+  background:rgba(255,255,255,.03);
+}
+
+.owner-row b{ color:#00f0ff; }
+
+.pin-reveal{
+  text-align:center;
+  font-size:26px;
+  letter-spacing:4px;
+  color:#ffb800;
+  font-weight:900;
+  margin:10px 0;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="bubble-container"></div>
+
+<div class="firma">🚀 Powered By • I'm DuvalinBS</div>
+
+<div class="nav">
+  <button onclick="irA('principal')">Principal</button>
+  <button onclick="irA('miembros')">Miembros</button>
+  <button onclick="irA('links')">Links</button>
+</div>
+
+<!-- ================= PRINCIPAL ================= -->
+<div id="principal" class="page active">
+<h2>Menu / Principal</h2>
+
+<div class="btn" onclick="toggleGrupo(this)">👑 DUEÑO / OWNER / LIDER ▼</div>
+<div class="grupo" id="grupo-owner" style="display:none;"></div>
+
+<div class="btn" onclick="toggleGrupo(this)">👑 DEVS / OWNERS / SOPORTE ▼</div>
+<div class="grupo" id="grupo-devs" style="display:none;"></div>
+
+<div class="btn" onclick="toggleGrupo(this)">👑 AYUDANTES - ERIS BOT ▼</div>
+<div class="grupo" id="grupo-ayudantes" style="display:none;"></div>
+</div>
+
+<!-- ================= MIEMBROS ================= -->
+<div id="miembros" class="page">
+<h2>Miembros Destacados</h2>
+
+<div class="btn" onclick="toggleGrupo(this)">⭐ MIEMBROS DESTACADOS ▼</div>
+<div class="grupo" id="grupo-miembros" style="display:none;"></div>
+</div>
+
+<!-- ================= LINKS ================= -->
+<div id="links" class="page">
+<h2 class="title">🌐 Links Oficiales</h2>
+<a class="btn" href="LINK_DEL_GRUPO_OFICIAL" target="_blank">Grupo Oficial</a>
+<a class="btn" href="LINK_DEL_GRUPO_SECUNDARIO" target="_blank">Grupo Secundario</a>
+<a class="btn" href="LINK_DEL_CANAL_OFICIAL" target="_blank">Canal Oficial</a>
+</div>
+
+<!-- ================= BOTONES FLOTANTES ================= -->
+<button class="float-btn" id="btnAcceso" onclick="abrirLogin()">🔑 Acceso</button>
+<button class="float-btn" id="btnPanel" onclick="abrirPanelOwner()">👑 Panel Owner</button>
+<button class="float-btn" id="btnMiPerfil" onclick="abrirEdicionPropia()">✏️ Mi Perfil</button>
+
+<!-- ================= MODAL: LOGIN ================= -->
+<div class="modal-overlay" id="modalLogin">
+  <div class="modal-box">
+    <h3>🔑 Acceso Admin/Owner</h3>
+    <div class="field">
+      <label>Ingresa tu PIN</label>
+      <input type="text" id="pinInput" inputmode="numeric" maxlength="8" placeholder="Ej: 483920">
+    </div>
+    <div class="msg" id="loginMsg"></div>
+    <div class="btn copy" onclick="intentarLogin()">Entrar</div>
+    <div class="btn" onclick="cerrarModal('modalLogin')">Cancelar</div>
+  </div>
+</div>
+
+<!-- ================= MODAL: EDITAR PERFIL ================= -->
+<div class="modal-overlay" id="modalEdit">
+  <div class="modal-box">
+    <h3>✏️ Editar Perfil</h3>
+    <div class="field"><label>Foto (URL)</label><input id="f_foto"></div>
+    <div class="field"><label>Grupo</label>
+      <select id="f_grupo">
+        <option value="owner">Dueño / Owner / Líder</option>
+        <option value="devs">Devs / Owners / Soporte</option>
+        <option value="ayudantes">Ayudantes</option>
+        <option value="miembros">Miembros Destacados</option>
+      </select>
+    </div>
+    <div class="field"><label>Nombre</label><input id="f_nombre"></div>
+    <div class="field"><label>Edad</label><input id="f_edad"></div>
+    <div class="field"><label>Cumpleaños</label><input id="f_cumple"></div>
+    <div class="field"><label>Género</label><input id="f_genero"></div>
+    <div class="field"><label>Región</label><input id="f_region"></div>
+    <div class="field"><label>WhatsApp (número, ej: 521...)</label><input id="f_wa"></div>
+    <div class="field"><label>YouTube (link)</label><input id="f_yt"></div>
+    <div class="field"><label>Instagram (link)</label><input id="f_ig"></div>
+    <div class="field"><label>TikTok (link)</label><input id="f_tt"></div>
+    <div class="msg" id="editMsg"></div>
+    <div class="btn copy" onclick="guardarEdicion()">Guardar</div>
+    <div class="btn" onclick="cerrarModal('modalEdit')">Cerrar</div>
+  </div>
+</div>
+
+<!-- ================= MODAL: PANEL OWNER ================= -->
+<div class="modal-overlay" id="modalOwner">
+  <div class="modal-box">
+    <h3>👑 Panel Owner</h3>
+
+    <div class="btn copy" onclick="mostrarCrear()">➕ Crear nuevo perfil / PIN</div>
+    <div id="crearForm" style="display:none;">
+      <div class="field"><label>Nombre</label><input id="nc_nombre"></div>
+      <div class="field"><label>Grupo</label>
+        <select id="nc_grupo">
+          <option value="owner">Dueño / Owner / Líder</option>
+          <option value="devs">Devs / Owners / Soporte</option>
+          <option value="ayudantes">Ayudantes</option>
+          <option value="miembros">Miembros Destacados</option>
+        </select>
+      </div>
+      <div class="field"><label>Rol de acceso</label>
+        <select id="nc_rol">
+          <option value="admin">Admin (solo edita su propio perfil)</option>
+          <option value="owner">Owner (control total)</option>
+        </select>
+      </div>
+      <div class="msg" id="crearMsg"></div>
+      <div class="btn copy" onclick="crearPerfil()">Generar PIN</div>
+    </div>
+
+    <hr style="border-color:#222;margin:16px 0;">
+    <div id="listaOwner"></div>
+    <div class="btn" onclick="cerrarModal('modalOwner')">Cerrar</div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+
+/* =====================================================
+   1) CONFIGURACIÓN DE FIREBASE
+   Reemplaza esto con las llaves de TU proyecto Firebase
+   (Firebase Console -> Configuración del proyecto -> tus apps -> SDK setup)
+===================================================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyDiOlM7w06YkHJFWvNtucBAN0rTrSrsbkQ",
+  authDomain: "usuarios-basedato.firebaseapp.com",
+  projectId: "usuarios-basedato",
+  storageBucket: "usuarios-basedato.firebasestorage.app",
+  messagingSenderId: "6182075364",
+  appId: "1:6182075364:web:86e1c206e343e6cfdda5f1"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+/* =====================================================
+   2) ESTADO GLOBAL
+===================================================== */
+let currentUid = null;
+let currentRole = null;      // "owner" | "admin" | null
+let currentProfileId = null; // perfil que este usuario puede editar (si es admin)
+let profilesCache = {};      // id -> data
+let editingId = null;        // qué perfil se está editando en el modal
+
+/* =====================================================
+   3) NAVEGACIÓN Y BURBUJAS (igual que antes)
+===================================================== */
+function irA(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+const container = document.querySelector(".bubble-container");
+for(let i=0;i<30;i++){
+  const b = document.createElement("div");
+  b.className="bubble";
+  b.style.width=(Math.random()*35+10)+"px";
+  b.style.height=b.style.width;
+  b.style.left=Math.random()*100+"%";
+  b.style.animationDuration=(Math.random()*10+8)+"s";
+  container.appendChild(b);
+}
+
+function openWA(num){ window.open("https://wa.me/"+num,"_blank"); }
+
+function toggleRedes(btn){
+  const redes = btn.nextElementSibling;
+  redes.style.display = redes.style.display==="block"?"none":"block";
+}
+
+function toggleGrupo(btn){
+  const grupo = btn.nextElementSibling;
+  grupo.style.display = grupo.style.display==="block"?"none":"block";
+}
+
+function copyCard(id){
+  const d = profilesCache[id];
+  if(!d) return;
+  const text =
+`🍭 ▸ NOMBRE:: ${d.nombre||'EDITAR'}
+🍂 ▸ EDAD:: ${d.edad||'EDITAR'}
+🎉 ▸ CUMPLEAÑOS:: ${d.cumple||'EDITAR'}
+⚧️ ▸ GÉNERO:: ${d.genero||'EDITAR'}
+🌎 ▸ REGIÓN:: ${d.region||'EDITAR'}`;
+  navigator.clipboard.writeText(text);
+}
+
+function abrirModal(id){ document.getElementById(id).classList.add('active'); }
+function cerrarModal(id){ document.getElementById(id).classList.remove('active'); }
+
+/* =====================================================
+   4) RENDER DE PERFILES (tiempo real desde Firestore)
+===================================================== */
+const grupos = ['owner','devs','ayudantes','miembros'];
+
+db.collection('profiles').onSnapshot(snap=>{
+  profilesCache = {};
+  const porGrupo = { owner:[], devs:[], ayudantes:[], miembros:[] };
+
+  snap.forEach(doc=>{
+    const d = doc.data();
+    profilesCache[doc.id] = d;
+    if(porGrupo[d.grupo]) porGrupo[d.grupo].push({id:doc.id, ...d});
+  });
+
+  grupos.forEach(g=>{
+    const cont = document.getElementById('grupo-'+g);
+    if(!cont) return;
+    cont.innerHTML = porGrupo[g].map(p=>tarjetaHTML(p)).join('') ||
+      '<p style="text-align:center;color:#666;">Sin perfiles aún.</p>';
+  });
+
+  if(currentRole === 'owner') renderPanelOwner();
+});
+
+function tarjetaHTML(p){
+  const puedeEditar = currentRole === 'owner' || p.id === currentProfileId;
+  return `
+  <div class="card">
+    <img class="pfp" src="${p.foto||''}" onerror="this.src='https://files.catbox.moe/ifpixp.jpeg'">
+    🍭 ▸ NOMBRE:: ${p.nombre||'EDITAR'}<br>
+    🍂 ▸ EDAD:: ${p.edad||'EDITAR'}<br>
+    🎉 ▸ CUMPLEAÑOS:: ${p.cumple||'EDITAR'}<br>
+    ⚧️ ▸ GÉNERO:: ${p.genero||'EDITAR'}<br>
+    🌎 ▸ REGIÓN:: ${p.region||'EDITAR'}<br>
+
+    <div class="btn copy" onclick="copyCard('${p.id}')">📋 Copiar</div>
+
+    ${(p.wa||p.yt||p.ig||p.tt) ? `
+    <div class="btn" onclick="toggleRedes(this)">🌐 Redes Sociales ▼</div>
+    <div class="redes" style="display:none;">
+      ${p.wa? `<div class="btn wa" onclick="openWA('${p.wa}')">WhatsApp</div>`:''}
+      ${p.yt? `<div class="btn yt" onclick="window.open('${p.yt}','_blank')">YouTube</div>`:''}
+      ${p.ig? `<div class="btn ig" onclick="window.open('${p.ig}','_blank')">Instagram</div>`:''}
+      ${p.tt? `<div class="btn tt" onclick="window.open('${p.tt}','_blank')">TikTok</div>`:''}
+    </div>` : ''}
+
+    ${puedeEditar ? `<div class="btn edit" onclick="abrirEdicion('${p.id}')">✏️ Editar este perfil</div>` : ''}
+  </div>`;
+}
+
+/* =====================================================
+   5) LOGIN POR PIN
+===================================================== */
+function abrirLogin(){
+  document.getElementById('loginMsg').textContent = '';
+  document.getElementById('pinInput').value = '';
+  abrirModal('modalLogin');
+}
+
+async function intentarLogin(){
+  const pin = document.getElementById('pinInput').value.trim();
+  const msg = document.getElementById('loginMsg');
+  msg.className = 'msg';
+  if(!pin){ msg.textContent='Escribe un PIN.'; msg.className='msg err'; return; }
+
+  msg.textContent = 'Verificando...';
+
+  try{
+    const pinDoc = await db.collection('pins').doc(pin).get();
+    if(!pinDoc.exists){
+      msg.textContent = 'PIN inválido.'; msg.className='msg err'; return;
+    }
+    const { role, profileId } = pinDoc.data();
+
+    if(!auth.currentUser){
+      await auth.signInAnonymously();
+    }
+    const uid = auth.currentUser.uid;
+
+    // Crear/asegurar rol (solo funciona si el pin es válido, lo valida Firestore Rules)
+    const roleRef = db.collection('roles').doc(uid);
+    const roleSnap = await roleRef.get();
+    if(!roleSnap.exists){
+      await roleRef.set({ role, profileId, pin });
+    }
+
+    // Reclamar el perfil (asignar ownerUid) si aún no tiene dueño
+    const profRef = db.collection('profiles').doc(profileId);
+    const profSnap = await profRef.get();
+    if(profSnap.exists){
+      const data = profSnap.data();
+      if(!data.ownerUid){
+        await profRef.update({ ownerUid: uid });
+      } else if(data.ownerUid !== uid){
+        msg.textContent = 'Este PIN ya está activo en otro dispositivo. Pide al Owner que reinicie tu acceso.';
+        msg.className = 'msg err';
+        return;
+      }
+    }
+
+    msg.textContent = '¡Acceso concedido!';
+    msg.className = 'msg ok';
+    setTimeout(()=> cerrarModal('modalLogin'), 700);
+    aplicarSesion(uid, role, profileId);
+
+  }catch(e){
+    console.error(e);
+    msg.textContent = 'Error al verificar. Intenta de nuevo.';
+    msg.className = 'msg err';
+  }
+}
+
+function aplicarSesion(uid, role, profileId){
+  currentUid = uid;
+  currentRole = role;
+  currentProfileId = profileId;
+
+  document.getElementById('btnAcceso').style.display = 'none';
+  if(role === 'owner'){
+    document.getElementById('btnPanel').style.display = 'block';
+  } else {
+    document.getElementById('btnMiPerfil').style.display = 'block';
+  }
+  // Forzar re-render de tarjetas para mostrar botones de editar
+  db.collection('profiles').get().then(()=>{});
+}
+
+/* Revisar si ya había sesión guardada (mismo navegador) */
+auth.onAuthStateChanged(async user=>{
+  if(!user){ return; }
+  const roleSnap = await db.collection('roles').doc(user.uid).get();
+  if(roleSnap.exists){
+    const { role, profileId } = roleSnap.data();
+    aplicarSesion(user.uid, role, profileId);
+  }
+});
+
+/* =====================================================
+   6) EDITAR PERFIL (propio o cualquiera si eres owner)
+===================================================== */
+function abrirEdicionPropia(){
+  abrirEdicion(currentProfileId);
+}
+
+function abrirEdicion(id){
+  const d = profilesCache[id];
+  if(!d) return;
+  editingId = id;
+  document.getElementById('f_foto').value = d.foto||'';
+  document.getElementById('f_grupo').value = d.grupo||'miembros';
+  document.getElementById('f_nombre').value = d.nombre||'';
+  document.getElementById('f_edad').value = d.edad||'';
+  document.getElementById('f_cumple').value = d.cumple||'';
+  document.getElementById('f_genero').value = d.genero||'';
+  document.getElementById('f_region').value = d.region||'';
+  document.getElementById('f_wa').value = d.wa||'';
+  document.getElementById('f_yt').value = d.yt||'';
+  document.getElementById('f_ig').value = d.ig||'';
+  document.getElementById('f_tt').value = d.tt||'';
+  document.getElementById('editMsg').textContent = '';
+
+  // Un admin normal no puede cambiar de grupo (opcional: bloquear el selector)
+  document.getElementById('f_grupo').disabled = (currentRole !== 'owner');
+
+  abrirModal('modalEdit');
+}
+
+async function guardarEdicion(){
+  const msg = document.getElementById('editMsg');
+  if(!editingId){ return; }
+  const payload = {
+    foto: document.getElementById('f_foto').value.trim(),
+    nombre: document.getElementById('f_nombre').value.trim(),
+    edad: document.getElementById('f_edad').value.trim(),
+    cumple: document.getElementById('f_cumple').value.trim(),
+    genero: document.getElementById('f_genero').value.trim(),
+    region: document.getElementById('f_region').value.trim(),
+    wa: document.getElementById('f_wa').value.trim(),
+    yt: document.getElementById('f_yt').value.trim(),
+    ig: document.getElementById('f_ig').value.trim(),
+    tt: document.getElementById('f_tt').value.trim(),
+  };
+  if(currentRole === 'owner'){
+    payload.grupo = document.getElementById('f_grupo').value;
+  }
+  try{
+    await db.collection('profiles').doc(editingId).update(payload);
+    msg.textContent = 'Guardado ✔';
+    msg.className = 'msg ok';
+    setTimeout(()=> cerrarModal('modalEdit'), 600);
+  }catch(e){
+    console.error(e);
+    msg.textContent = 'No se pudo guardar.';
+    msg.className = 'msg err';
+  }
+}
+
+/* =====================================================
+   7) PANEL OWNER: crear perfiles/PIN, listar, resetear, eliminar
+===================================================== */
+function abrirPanelOwner(){
+  document.getElementById('crearForm').style.display = 'none';
+  document.getElementById('crearMsg').textContent = '';
+  renderPanelOwner();
+  abrirModal('modalOwner');
+}
+
+function mostrarCrear(){
+  const f = document.getElementById('crearForm');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+}
+
+function generarPin(){
+  return String(Math.floor(100000 + Math.random()*900000));
+}
+
+async function crearPerfil(){
+  const msg = document.getElementById('crearMsg');
+  const nombre = document.getElementById('nc_nombre').value.trim();
+  const grupo = document.getElementById('nc_grupo').value;
+  const rol = document.getElementById('nc_rol').value;
+
+  if(!nombre){ msg.textContent='Ponle un nombre.'; msg.className='msg err'; return; }
+
+  try{
+    const profRef = db.collection('profiles').doc();
+    await profRef.set({
+      nombre, grupo, ownerUid: '',
+      edad:'', cumple:'', genero:'', region:'',
+      foto:'', wa:'', yt:'', ig:'', tt:''
+    });
+
+    const pin = generarPin();
+    await db.collection('pins').doc(pin).set({ role: rol, profileId: profRef.id });
+
+    msg.innerHTML = `Perfil creado. Comparte este PIN con la persona:<div class="pin-reveal">${pin}</div>`;
+    msg.className = 'msg ok';
+    document.getElementById('nc_nombre').value = '';
+  }catch(e){
+    console.error(e);
+    msg.textContent = 'Error al crear (revisa las reglas de Firestore).';
+    msg.className = 'msg err';
+  }
+}
+
+async function renderPanelOwner(){
+  const cont = document.getElementById('listaOwner');
+  if(!cont || currentRole !== 'owner') return;
+  const rows = Object.entries(profilesCache).map(([id,d])=>`
+    <div class="owner-row">
+      <b>${d.nombre||'(sin nombre)'}</b> — ${d.grupo}<br>
+      <small>${d.ownerUid ? '🔒 Acceso reclamado' : '🟡 PIN sin usar aún'}</small>
+      <div style="display:flex;gap:6px;margin-top:8px;">
+        <div class="btn edit" style="flex:1;margin:0;" onclick="cerrarModal('modalOwner');abrirEdicion('${id}')">Editar</div>
+        <div class="btn" style="flex:1;margin:0;" onclick="resetearAcceso('${id}')">Reset</div>
+        <div class="btn danger" style="flex:1;margin:0;" onclick="eliminarPerfil('${id}')">Eliminar</div>
+      </div>
+    </div>
+  `).join('');
+  cont.innerHTML = rows || '<p style="color:#666;text-align:center;">No hay perfiles todavía.</p>';
+}
+
+async function resetearAcceso(id){
+  if(!confirm('¿Reiniciar el acceso de este perfil? La persona necesitará volver a usar su PIN para reclamarlo (por ejemplo en un celular nuevo).')) return;
+  await db.collection('profiles').doc(id).update({ ownerUid: '' });
+}
+
+async function eliminarPerfil(id){
+  if(!confirm('¿Eliminar este perfil por completo? Esto no se puede deshacer.')) return;
+  await db.collection('profiles').doc(id).delete();
+  renderPanelOwner();
+}
+
+</script>
+
+</body>
+</html>
