@@ -1,22 +1,21 @@
 /* =====================================================
-   SKIN: NEON
-   Diseño moderno con tarjeta de vidrio y filas etiqueta/valor.
+   SKIN: NEON (estilo clásico de bordes brillantes)
 ===================================================== */
 window.SKINS = window.SKINS || {};
 
 window.SKINS.neon = function(id, p, puedeEditar){
   return `
-  <div class="card skin-neon">
+  <div class="card skin-neon skin-classic">
     <div class="pfp-wrap">
       <img class="pfp" src="${p.foto||''}" onerror="this.src='https://files.catbox.moe/ifpixp.jpeg'">
     </div>
 
     <div class="rows">
-      <div class="row"><span class="row-icon">🍭</span><span class="row-label">Nombre</span><span class="row-value">${p.nombre||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🍂</span><span class="row-label">Edad</span><span class="row-value">${p.edad||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🎉</span><span class="row-label">Cumple</span><span class="row-value">${p.cumple||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">⚧️</span><span class="row-label">Género</span><span class="row-value">${p.genero||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🌎</span><span class="row-label">Región</span><span class="row-value">${p.region||'EDITAR'}</span></div>
+      <div class="line-row">🍭 ▸ NOMBRE:: ${p.nombre||'EDITAR'}</div>
+      <div class="line-row">🍂 ▸ EDAD:: ${p.edad||'EDITAR'}</div>
+      <div class="line-row">🎉 ▸ CUMPLEAÑOS:: ${p.cumple||'EDITAR'}</div>
+      <div class="line-row">⚧️ ▸ GÉNERO:: ${p.genero||'EDITAR'}</div>
+      <div class="line-row">🌎 ▸ REGIÓN:: ${p.region||'EDITAR'}</div>
     </div>
 
     ${reputationWidgetHTML(id, p.rep)}
