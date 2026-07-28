@@ -108,15 +108,16 @@ body{
   margin-bottom:22px;
   padding:20px 18px 18px;
   border-radius:22px;
-  border:1px solid rgba(0,240,255,.18);
+  border:1.5px solid rgba(0,240,255,.32);
 
   background:
-    linear-gradient(145deg, rgba(20,22,28,.85), rgba(10,11,15,.85));
+    linear-gradient(145deg, rgba(22,25,32,.88), rgba(9,10,14,.88));
   backdrop-filter:blur(14px);
 
   box-shadow:
-    0 1px 0 rgba(255,255,255,.04) inset,
-    0 20px 40px rgba(0,0,0,.45);
+    0 1px 0 rgba(255,255,255,.05) inset,
+    0 0 22px rgba(0,240,255,.10),
+    0 20px 40px rgba(0,0,0,.5);
 
   transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
   overflow:hidden;
@@ -126,10 +127,11 @@ body{
   content:"";
   position:absolute;
   top:0; left:0; right:0;
-  height:3px;
+  height:4px;
   background:linear-gradient(90deg, #00f0ff, #ffb800, #ff4fd8, #00f0ff);
   background-size:300% 100%;
-  animation: shimmer 6s linear infinite;
+  animation: shimmer 5s linear infinite;
+  box-shadow:0 0 12px rgba(0,240,255,.6);
 }
 
 @keyframes shimmer{
@@ -192,7 +194,9 @@ body{
 
 .row-value{
   color:#f0fbfc;
-  font-weight:600;
+  font-weight:800;
+  font-size:15.5px;
+  text-shadow:0 0 8px rgba(0,240,255,.25);
   word-break:break-word;
 }
 
@@ -417,3 +421,73 @@ body{
   margin:12px 0;
   text-shadow:0 0 12px rgba(255,184,0,.5);
 }
+
+/* ================= REPUTACIÓN / ESTRELLA ================= */
+.rep-row{
+  display:flex;
+  gap:8px;
+  margin:12px 0;
+}
+
+.star-btn{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:11px;
+  border-radius:13px;
+  border:1px solid rgba(255,184,0,.45);
+  background:linear-gradient(135deg, rgba(255,184,0,.18), rgba(255,79,216,.08));
+  color:#ffd980;
+  font-weight:700;
+  font-size:13px;
+  cursor:pointer;
+}
+
+.star-btn.on-cooldown{
+  opacity:.5;
+  cursor:not-allowed;
+  color:#8a8a8a;
+  border-color:rgba(255,255,255,.15);
+  background:rgba(255,255,255,.03);
+}
+
+.claim-btn{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  padding:11px;
+  border-radius:13px;
+  border:none;
+  background:linear-gradient(135deg,#ffb800,#ff4fd8);
+  color:#1a0f00;
+  font-weight:800;
+  font-size:13px;
+  cursor:pointer;
+  animation: pulseClaim 1.4s ease-in-out infinite;
+}
+
+@keyframes pulseClaim{
+  0%,100%{ box-shadow:0 0 0 rgba(255,184,0,.4); }
+  50%{ box-shadow:0 0 18px rgba(255,184,0,.7); }
+}
+
+/* ================= SKIN: BOT (bloque decorativo) ================= */
+.skin-bot .ascii-block{
+  font-family:'Courier New', monospace;
+  font-size:11.5px;
+  line-height:1.5;
+  white-space:pre;
+  overflow-x:auto;
+  color:#7fffd4;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(0,240,255,.25);
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:14px;
+  text-shadow:0 0 6px rgba(127,255,212,.4);
+                  }
+   
