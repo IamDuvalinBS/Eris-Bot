@@ -38,10 +38,34 @@ db.collection('profiles').onSnapshot(snap=>{
   if(currentRole === 'owner') renderPanelOwner();
 });
 
+function tarjetaFallback(id, p, puedeEditar){
+  return `
+  <div class="card">
+    <p style="color:#ff3355;font-size:12px;text-align:center;">⚠ No se cargó el diseño (skins/). Mostrando modo básico.</p>
+    <div class="rows">
+      <div class="row"><span class="row-icon">🍭</span><span class="row-label">Nombre</span><span class="row-value">${p.nombre||'EDITAR'}</span></div>
+      <div class="row"><span class="row-icon">🍂</span><span class="row-label">Edad</span><span class="row-value">${p.edad||'EDITAR'}</span></div>
+      <div class="row"><span class="row-icon">🎉</span><span class="row-label">Cumple</span><span class="row-value">${p.cumple||'EDITAR'}</span></div>
+      <div class="row"><span class="row-icon">⚧️</span><span class="row-label">Género</span><span class="row-value">${p.genero||'EDITAR'}</span></div>
+      <div class="row"><span class="row-icon">🌎</span><span class="row-label">Región</span><span class="row-value">${p.region||'EDITAR'}</span></div>
+    </div>
+    ${puedeEditar ? `<div class="btn edit" onclick="abrirEdicion('${id}')">✏️ Editar este perfil</div>` : ''}
+  </div>`;
+}
+
 function tarjetaHTML(p){
   const puedeEditar = currentRole === 'owner' || p.id === currentProfileId;
-  const skinFn = (window.SKINS && window.SKINS[p.estilo]) || window.SKINS.neon;
-  return skinFn(p.id, p, puedeEditar);
+  let skinFn = null;
+  if(window.SKINS && window.SKINS[p.estilo]) skinFn = window.SKINS[p.estilo];
+  else if(window.SKINS && window.SKINS.neon) skinFn = window.SKINS.neon;
+  else skinFn = tarjetaFallback;
+
+  try{
+    return skinFn(p.id, p, puedeEditar);
+  }catch(e){
+    console.error('Error al renderizar tarjeta', p.id, e);
+    return tarjetaFallback(p.id, p, puedeEditar);
+  }
 }
 
 /* =====================================================
@@ -403,5 +427,5 @@ async function renderBuzon(){
 async function eliminarBuzon(docId){
   await db.collection('buzon').doc(docId).delete();
   renderBuzon();
-    }
+}
    
