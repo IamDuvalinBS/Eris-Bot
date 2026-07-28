@@ -90,9 +90,27 @@
     <div class="field"><label>YouTube (link)</label><input id="f_yt"></div>
     <div class="field"><label>Instagram (link)</label><input id="f_ig"></div>
     <div class="field"><label>TikTok (link)</label><input id="f_tt"></div>
+    <div class="field"><label>Estilo de tarjeta</label>
+      <select id="f_estilo">
+        <option value="neon">Neon (moderno)</option>
+        <option value="bot">Estilo Bot (decorativo)</option>
+      </select>
+    </div>
     <div class="msg" id="editMsg"></div>
     <div class="btn copy" onclick="guardarEdicion()">Guardar</div>
     <div class="btn" onclick="cerrarModal('modalEdit')">Cerrar</div>
+  </div>
+</div>
+
+<!-- ================= MODAL: CANJEAR RECOMPENSA ================= -->
+<div class="modal-overlay" id="modalCanje">
+  <div class="modal-box">
+    <h3>🎁 Canjear Recompensa</h3>
+    <p id="canjeTexto" style="font-size:14px;line-height:1.5;color:#eaf6f8;"></p>
+    <div class="field"><label>Tu número de WhatsApp</label><input id="canjeWa" inputmode="tel" placeholder="Ej: 521..."></div>
+    <div class="msg" id="canjeMsg"></div>
+    <div class="btn copy" onclick="enviarCanje()">Enviar</div>
+    <div class="btn" onclick="cerrarModal('modalCanje')">Cancelar</div>
   </div>
 </div>
 
@@ -122,6 +140,9 @@
       <div class="btn copy" onclick="crearPerfil()">Generar PIN</div>
     </div>
 
+    <div class="btn" onclick="mostrarBuzon()">📬 Ver Buzón de Canjes</div>
+    <div id="buzonLista" style="display:none;"></div>
+
     <hr style="border-color:#222;margin:16px 0;">
     <div id="listaOwner"></div>
     <div class="btn" onclick="cerrarModal('modalOwner')">Cerrar</div>
@@ -134,7 +155,10 @@
 
 <script src="config.js"></script>
 <script src="ui.js"></script>
+<script src="skins/skin-neon.js"></script>
+<script src="skins/skin-bot.js"></script>
 <script src="app.js"></script>
 
 </body>
-</html>
+  </html>
+  
