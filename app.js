@@ -40,33 +40,8 @@ db.collection('profiles').onSnapshot(snap=>{
 
 function tarjetaHTML(p){
   const puedeEditar = currentRole === 'owner' || p.id === currentProfileId;
-  return `
-  <div class="card">
-    <div class="pfp-wrap">
-      <img class="pfp" src="${p.foto||''}" onerror="this.src='https://files.catbox.moe/ifpixp.jpeg'">
-    </div>
-
-    <div class="rows">
-      <div class="row"><span class="row-icon">🍭</span><span class="row-label">Nombre</span><span class="row-value">${p.nombre||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🍂</span><span class="row-label">Edad</span><span class="row-value">${p.edad||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🎉</span><span class="row-label">Cumple</span><span class="row-value">${p.cumple||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">⚧️</span><span class="row-label">Género</span><span class="row-value">${p.genero||'EDITAR'}</span></div>
-      <div class="row"><span class="row-icon">🌎</span><span class="row-label">Región</span><span class="row-value">${p.region||'EDITAR'}</span></div>
-    </div>
-
-    <div class="btn copy" onclick="copyCard('${p.id}')">📋 Copiar</div>
-
-    ${(p.wa||p.yt||p.ig||p.tt) ? `
-    <div class="redes-toggle" onclick="toggleRedes(this)">🌐 Redes Sociales <span>▾</span></div>
-    <div class="redes" style="display:none;">
-      ${p.wa? `<div class="social-pill wa" onclick="openWA('${p.wa}')">WhatsApp</div>`:''}
-      ${p.yt? `<div class="social-pill yt" onclick="window.open('${p.yt}','_blank')">YouTube</div>`:''}
-      ${p.ig? `<div class="social-pill ig" onclick="window.open('${p.ig}','_blank')">Instagram</div>`:''}
-      ${p.tt? `<div class="social-pill tt" onclick="window.open('${p.tt}','_blank')">TikTok</div>`:''}
-    </div>` : ''}
-
-    ${puedeEditar ? `<div class="btn edit" onclick="abrirEdicion('${p.id}')">✏️ Editar este perfil</div>` : ''}
-  </div>`;
+  const skinFn = (window.SKINS && window.SKINS[p.estilo]) || window.SKINS.neon;
+  return skinFn(p.id, p, puedeEditar);
 }
 
 /* =====================================================
@@ -145,6 +120,16 @@ function aplicarSesion(uid, role, profileId){
 /* Revisar si ya había sesión guardada (mismo navegador) */
 auth.onAuthStateChanged(async user=>{
   if(!user){ return; }
+
+  // Sincronizar cooldowns reales de reputación guardados en el servidor
+  try{
+    const votesSnap = await db.collection('votes').doc(user.uid).collection('items').get();
+    votesSnap.forEach(doc=>{
+      const next = doc.data().nextEligible;
+      if(next) localStorage.setItem('star_cd_'+doc.id, String(next));
+    });
+  }catch(e){ /* silencioso: si falla, se queda el valor local anterior */ }
+
   const roleSnap = await db.collection('roles').doc(user.uid).get();
   if(roleSnap.exists){
     const { role, profileId } = roleSnap.data();
@@ -174,6 +159,7 @@ function abrirEdicion(id){
   document.getElementById('f_yt').value = d.yt||'';
   document.getElementById('f_ig').value = d.ig||'';
   document.getElementById('f_tt').value = d.tt||'';
+  document.getElementById('f_estilo').value = d.estilo||'neon';
   document.getElementById('editMsg').textContent = '';
 
   document.getElementById('f_grupo').disabled = (currentRole !== 'owner');
@@ -195,6 +181,7 @@ async function guardarEdicion(){
     yt: document.getElementById('f_yt').value.trim(),
     ig: document.getElementById('f_ig').value.trim(),
     tt: document.getElementById('f_tt').value.trim(),
+    estilo: document.getElementById('f_estilo').value,
   };
   if(currentRole === 'owner'){
     payload.grupo = document.getElementById('f_grupo').value;
@@ -243,7 +230,8 @@ async function crearPerfil(){
     await profRef.set({
       nombre, grupo, ownerUid: '',
       edad:'', cumple:'', genero:'', region:'',
-      foto:'', wa:'', yt:'', ig:'', tt:''
+      foto:'', wa:'', yt:'', ig:'', tt:'',
+      rep: 0, estilo: 'neon'
     });
 
     const pin = generarPin();
@@ -286,3 +274,134 @@ async function eliminarPerfil(id){
   await db.collection('profiles').doc(id).delete();
   renderPanelOwner();
 }
+
+/* =====================================================
+   REPUTACIÓN: dar estrella
+   (el cooldown de 24h se guarda en el navegador de quien vota)
+===================================================== */
+async function darStar(id){
+  const restante = msRestantes(id);
+  if(restante > 0) return;
+
+  if(!auth.currentUser){
+    try{ await auth.signInAnonymously(); }
+    catch(e){ alert('No se pudo verificar tu dispositivo, intenta de nuevo.'); return; }
+  }
+  const uid = auth.currentUser.uid;
+  const voteRef = db.collection('votes').doc(uid).collection('items').doc(id);
+  const profRef = db.collection('profiles').doc(id);
+
+  try{
+    await db.runTransaction(async (tx)=>{
+      const voteSnap = await tx.get(voteRef);
+      const now = Date.now();
+      if(voteSnap.exists && (voteSnap.data().nextEligible||0) > now){
+        throw new Error('cooldown');
+      }
+      const profSnap = await tx.get(profRef);
+      if(!profSnap.exists) throw new Error('no-profile');
+      const nuevaRep = (profSnap.data().rep || 0) + 1;
+      const proximo = now + 24*60*60*1000;
+      tx.update(profRef, { rep: nuevaRep });
+      tx.set(voteRef, { nextEligible: proximo });
+    });
+
+    const proximo = Date.now() + 24*60*60*1000;
+    localStorage.setItem('star_cd_'+id, String(proximo));
+    localStorage.setItem('claim_ready_'+id, '1');
+
+    const claimBtn = document.getElementById('claim-'+id);
+    if(claimBtn) claimBtn.style.display = 'flex';
+  }catch(e){
+    if(e.message !== 'cooldown'){
+      console.error(e);
+      alert('No se pudo dar la estrella, intenta de nuevo.');
+    }
+  }
+}
+
+/* =====================================================
+   CANJEAR RECOMPENSA
+===================================================== */
+let canjeProfileId = null;
+
+function abrirCanje(id){
+  canjeProfileId = id;
+  const p = window.profilesCache[id] || {};
+  const restante = msRestantes(id);
+  document.getElementById('canjeTexto').innerHTML =
+    `Canjea tus <b>20,000¥</b> en Eris-Bot (esto por dar reputación a <b>${p.nombre||'este admin'}</b>).<br>Próximo rep disponible en: <b>${formatoTiempo(restante)}</b>`;
+  document.getElementById('canjeWa').value = '';
+  document.getElementById('canjeMsg').textContent = '';
+  abrirModal('modalCanje');
+}
+
+async function enviarCanje(){
+  const msg = document.getElementById('canjeMsg');
+  const wa = document.getElementById('canjeWa').value.trim();
+  if(!wa){ msg.textContent='Escribe tu número de WhatsApp.'; msg.className='msg err'; return; }
+
+  try{
+    const p = window.profilesCache[canjeProfileId] || {};
+    await db.collection('buzon').add({
+      whatsapp: wa,
+      profileId: canjeProfileId,
+      profileNombre: p.nombre || '',
+      ts: Date.now()
+    });
+
+    localStorage.removeItem('claim_ready_'+canjeProfileId);
+    const claimBtn = document.getElementById('claim-'+canjeProfileId);
+    if(claimBtn) claimBtn.style.display = 'none';
+
+    msg.textContent = '¡Enviado! El Owner te contactará por WhatsApp.';
+    msg.className = 'msg ok';
+    setTimeout(()=> cerrarModal('modalCanje'), 900);
+  }catch(e){
+    console.error(e);
+    msg.textContent = 'No se pudo enviar, intenta de nuevo.';
+    msg.className = 'msg err';
+  }
+}
+
+/* =====================================================
+   BUZÓN PRIVADO (solo visible para el Owner)
+===================================================== */
+function mostrarBuzon(){
+  const cont = document.getElementById('buzonLista');
+  const abrir = cont.style.display === 'none';
+  cont.style.display = abrir ? 'block' : 'none';
+  if(abrir) renderBuzon();
+}
+
+async function renderBuzon(){
+  const cont = document.getElementById('buzonLista');
+  if(!cont || currentRole !== 'owner') return;
+  try{
+    const snap = await db.collection('buzon').orderBy('ts','desc').get();
+    if(snap.empty){
+      cont.innerHTML = '<p style="color:#666;text-align:center;">No hay solicitudes de canje.</p>';
+      return;
+    }
+    cont.innerHTML = snap.docs.map(doc=>{
+      const d = doc.data();
+      const fecha = new Date(d.ts).toLocaleString();
+      return `
+      <div class="owner-row">
+        <b>${d.profileNombre||'(perfil)'}</b><br>
+        <small>📱 ${d.whatsapp}</small><br>
+        <small style="color:#666;">${fecha}</small>
+        <div class="btn danger" style="margin-top:8px;" onclick="eliminarBuzon('${doc.id}')">Eliminar / Atendido</div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    cont.innerHTML = '<p style="color:#ff3355;text-align:center;">Error al cargar el buzón.</p>';
+  }
+}
+
+async function eliminarBuzon(docId){
+  await db.collection('buzon').doc(docId).delete();
+  renderBuzon();
+    }
+   
