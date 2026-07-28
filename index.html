@@ -44,9 +44,7 @@
 <!-- ================= LINKS ================= -->
 <div id="links" class="page">
 <h2 class="title">🌐 Links Oficiales</h2>
-<a class="btn" href="LINK_DEL_GRUPO_OFICIAL" target="_blank">Grupo Oficial</a>
-<a class="btn" href="LINK_DEL_GRUPO_SECUNDARIO" target="_blank">Grupo Secundario</a>
-<a class="btn" href="LINK_DEL_CANAL_OFICIAL" target="_blank">Canal Oficial</a>
+<div id="links-list"></div>
 </div>
 
 <!-- ================= BOTONES FLOTANTES ================= -->
@@ -143,6 +141,16 @@
     <div class="btn" onclick="mostrarBuzon()">📬 Ver Buzón de Canjes</div>
     <div id="buzonLista" style="display:none;"></div>
 
+    <div class="btn" onclick="mostrarLinksAdmin()">🔗 Gestionar Links</div>
+    <div id="linksAdminLista" style="display:none;">
+      <div class="field"><label>Nuevo botón - Nombre</label><input id="nl_label" placeholder="Ej: Grupo Oficial"></div>
+      <div class="field"><label>Nuevo botón - Link (URL)</label><input id="nl_url" placeholder="https://..."></div>
+      <div class="msg" id="nlMsg"></div>
+      <div class="btn copy" onclick="agregarLink()">Agregar link</div>
+      <hr style="border-color:#222;margin:12px 0;">
+      <div id="linksAdminItems"></div>
+    </div>
+
     <hr style="border-color:#222;margin:16px 0;">
     <div id="listaOwner"></div>
     <div class="btn" onclick="cerrarModal('modalOwner')">Cerrar</div>
@@ -158,6 +166,7 @@
 <script src="skins/skin-neon.js"></script>
 <script src="skins/skin-bot.js"></script>
 <script src="app.js"></script>
+<script src="links/links.js"></script>
 
 </body>
   </html>
